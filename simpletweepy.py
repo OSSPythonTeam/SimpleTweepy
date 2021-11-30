@@ -11,6 +11,8 @@ from tweepy import client
 from PIL import Image
 import pandas as pd
 
+from tweepy.simpleAuth import simpleAuth
+from tweepy.simpleSearch import tweet_result_test
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 consumer_key = ""
 consumer_secret = ""
@@ -18,9 +20,7 @@ consumer_secret = ""
 access_token = ""
 access_token_secret = ""
 
-auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-auth.set_access_token(access_token, access_token_secret)
-api = tweepy.API(auth)
+api = simpleAuth(consumer_key,consumer_secret,access_token,access_token_secret)
 
 api.verify_credentials().name
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -39,40 +39,20 @@ myinfo = {"name": temp.name, "ID": id, "description": temp.description,
 searchdata = pd.DataFrame(columns=['name', 'text'])
 
 
-def tweet_result():
-    search = search_bar.get(1.0, END)
-    keyword = search[1:]
-
-    #global searchdata
-    #searchdata = searchdata.drop(index=[])
-    result = []  # 크롤링 텍스트를 저장 할 리스트 변수
-
-    for i in range(1, 7):  # 1,2 페이지 크롤링
-        # keyword 검색 실시. 결과가 tweets 변수에 담긴다.
-        tweets = api.search_tweets(keyword)
-        result = []
-        for tweet in tweets:
-            global searchdata
-            searchdata = searchdata.append(
-                {'name': str(tweet.author.name), 'text': tweet.text}, ignore_index=True)
-
-            result.append("ID : " + tweet.author.name)
-            result.append([tweet.text])
-            result.append("like : "+str(tweet.favorite_count) +
-                          "    /    retweet : "+str(tweet.retweet_count))
-            result.append("- - - - - - - - - - - - - - - - - -")
-
-    lists.pack(side=LEFT, fill=X, expand=True)
-    lists.config(yscrollcommand=scr.set)
-    lists.delete(0, END)
-    for x in result:
-        lists.insert(END, str(x))
-
 
 def search_click():
     search = search_bar.get(1.0, END)
     if search[0] == "#":
-        tweet_result()
+
+        #simpleSearch
+        result = tweet_result_test(api,search[1:])
+
+        # GUI setting
+        lists.pack(side=LEFT, fill=X, expand=True)
+        lists.config(yscrollcommand=scr.set)
+        lists.delete(0, END)
+        for x in result:
+            lists.insert(END, str(x))
 
     elif search[0] == "@":
         user_result()
@@ -252,6 +232,23 @@ def save_result():
     search = search_bar.get(1.0, END)
     keyword = search[1:]
     tweets = api.search_tweets(keyword)
+
+    if idvar.get():
+        temp = []
+        for i in range(1, 7):
+            for tweet in tweets:
+                temp.append(str(tweet.author.name))
+
+        searchdata['name'] = temp
+
+    if textvar.get():
+        temp = []
+        for i in range(1, 7):
+            for tweet in tweets:
+                temp.append(tweet.text)
+
+        searchdata['text'] = temp
+
     if timevar.get():
         temp = []
         for i in range(1, 7):
@@ -356,12 +353,14 @@ my_info()
 
 # 체크버튼 (저장할 항목)
 #  - - - - - - - - - - - - - - - - - - - - - -
+idvar = BooleanVar()
+textvar = BooleanVar()
 timevar = BooleanVar()
 retweetvar = BooleanVar()
 likevar = BooleanVar()
 
-id_chk = Checkbutton(root, text="ID", state="disabled")
-text_chk = Checkbutton(root, text="text", state="disabled")
+id_chk = Checkbutton(root, text="ID", variable=idvar)
+text_chk = Checkbutton(root, text="text", variable=textvar)
 time_chk = Checkbutton(root, text="time", variable=timevar)
 retweet_chk = Checkbutton(root, text="retweet", variable=retweetvar)
 like_chk = Checkbutton(root, text="like", variable=likevar)
@@ -373,9 +372,9 @@ retweet_chk.pack()
 like_chk.pack()
 
 id_chk.place(x=410, y=700)
-id_chk.select()
+# id_chk.select()
 text_chk.place(x=480, y=700)
-text_chk.select()
+# text_chk.select()
 time_chk.place(x=565, y=700)
 retweet_chk.place(x=650, y=700)
 like_chk.place(x=740, y=700)
