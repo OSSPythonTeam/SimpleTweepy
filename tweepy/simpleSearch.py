@@ -1,4 +1,4 @@
-def tweet_result_test(api,keyword):
+def simple_tweet_result(api,keyword):
     result = []  # 크롤링 텍스트를 저장 할 리스트 변수
 
     for i in range(1, 7):  # 1,2 페이지 크롤링

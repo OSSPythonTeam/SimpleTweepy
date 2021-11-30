@@ -12,7 +12,9 @@ from PIL import Image
 import pandas as pd
 
 from tweepy.simpleAuth import simpleAuth
-from tweepy.simpleSearch import tweet_result_test
+from tweepy.simpleSearch import simple_tweet_result
+from tweepy.simpleUser import simple_user_result
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 consumer_key = ""
 consumer_secret = ""
@@ -20,32 +22,31 @@ consumer_secret = ""
 access_token = ""
 access_token_secret = ""
 
-api = simpleAuth(consumer_key,consumer_secret,access_token,access_token_secret)
+api = simpleAuth(consumer_key, consumer_secret, access_token, access_token_secret)
 
 api.verify_credentials().name
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-userinfo = {"name": "", "ID": "", "description": "",
-            "creation": "", "Followers": "", "tweets": "", "recipient_id": ""}
 
 temp = api.get_settings()
-id = "@"+temp["screen_name"]
+id = "@" + temp["screen_name"]
 temp = api.get_user(screen_name=id)
 
 myinfo = {"name": temp.name, "ID": id, "description": temp.description,
-          "creation": temp.created_at, "Followers": temp.following if temp.following else 0, "tweets": temp.statuses_count}
-
+          "creation": temp.created_at, "Followers": temp.following if temp.following else 0,
+          "tweets": temp.statuses_count}
 
 searchdata = pd.DataFrame(columns=['name', 'text'])
 
 
-
 def search_click():
     search = search_bar.get(1.0, END)
+    screenName = search
+
     if search[0] == "#":
 
-        #simpleSearch
-        result = tweet_result_test(api,search[1:])
+        # simpleSearch
+        result = simple_tweet_result(api, search[1:])
 
         # GUI setting
         lists.pack(side=LEFT, fill=X, expand=True)
@@ -55,98 +56,88 @@ def search_click():
             lists.insert(END, str(x))
 
     elif search[0] == "@":
-        user_result()
+
+        # simpleUser
+        userinfo = simple_user_result(api, screenName)
+
+        def send_dm():
+            try:
+                api.send_direct_message(
+                    recipient_id=userinfo["recipient_id"], text=dm_text.get("1.0", END))
+            except:
+                print("해당 유저에게는 DM을 보낼 수 없습니다.")
+
+        def follow_click():
+            api.create_friendship(screen_name=str(userinfo["ID"]))
+
+        def block_click():
+            api.create_block(screen_name=str(userinfo["ID"]))
+
+        def spam_click():
+            try:
+                api.report_spam(screen_name=user.screen_name)
+            except:
+                print("error")
+
+        # GUI setting
+        screenL = Label(userFrame, text=str(screenName),
+        nameL = Label(userFrame, text=str(userinfo["name"]), anchor=W, padx=0)
+        followersL = Label(userFrame, text=str(
+            userinfo["Followers"]) + "  Followers", anchor=W)
+        introduceL = Label(userFrame, text=str(userinfo["description"]), anchor=SW)
+        creationL = Label(userFrame, text=str(userinfo["creation"]), anchor=W)
+        tweet_countL = Label(userFrame, text=str(userinfo["tweets"]) + "  tweets")
+
+        nameL.configure(font=("Helvetica 27"))
+        screenL.configure(font=("Helvetica 10"))
+        introduceL.configure(font=("Helvetica 10"))
+        creationL.configure(font=("Helvetica 9"))
+        followersL.configure(font=("Helvetica 9 bold"))
+        tweet_countL.configure(font=("Helvetica 9 bold"))
+
+        nameL.pack()
+        screenL.pack()
+        introduceL.pack()
+        creationL.pack()
+        followersL.pack()
+        tweet_countL.pack()
+
+        nameL.place(x=5, y=50, width=300, height=45)
+        screenL.place(x=1, y=95, width=342, height=25)
+        introduceL.place(x=1, y=130, width=300, height=20)
+        creationL.place(x=1, y=170, width=300, height=10)
+        followersL.place(x=1, y=190, width=150, height=10)
+        tweet_countL.place(x=150, y=190, width=100, height=10)
+
+        follow_btn = Button(userFrame, text="follow",
+                            command=follow_click, font="Consolas 10 bold", bg="#F0F8FF")
+        block_btn = Button(userFrame, text="block",
+                           command=block_click, font="Consolas 10 bold", bg="#F0F8FF")
+        spam_btn = Button(userFrame, text="spam", command=spam_click,
+                          font="Consolas 10 bold", bg="#F0F8FF", fg="red")
+
+        dm_text = Text(userFrame, bd=1, bg="#ABB2B9", width=200,
+                       height=30, font="Helvetica 14", fg="black", relief="raised", border=2, )
+        send_btn = Button(userFrame, text="send", command=send_dm,
+                          border=1, background="#EAECEE")
+
+        follow_btn.pack()
+        block_btn.pack()
+        spam_btn.pack()
+        dm_text.pack()
+        send_btn.pack()
+
+        follow_btn.place(x=5, y=220, width=100, height=30)
+        block_btn.place(x=120, y=220, width=100, height=30)
+        spam_btn.place(x=235, y=220, width=100, height=30)
+        dm_text.place(x=10, y=550, width=320, height=150)
+        send_btn.place(x=150, y=700, width=50, height=30)
 
     else:
         return
 
 
-def user_result():
-
-    def send_dm():
-        api.send_direct_message(
-            recipient_id=userinfo["recipient_id"], text=dm_text.get("1.0", END))
-
-    search = search_bar.get(1.0, END)
-    screenName = search
-    user = api.get_user(screen_name=screenName)
-    userinfo["name"] = user.name
-    userinfo["creation"] = user.created_at
-    userinfo["description"] = user.description
-    userinfo["ID"] = user.screen_name
-    userinfo["tweets"] = user.statuses_count
-    userinfo["Followers"] = user.followers_count
-    userinfo["recipient_id"] = user.id
-
-    screenL = Label(userFrame, text=str(screenName),
-                    bg="Gray", anchor=NW, height=11, fg="white", font="Consolas")
-    nameL = Label(userFrame, text=str(userinfo["name"]), anchor=W, padx=0)
-    followersL = Label(userFrame, text=str(
-        userinfo["Followers"])+"  Followers", anchor=W)
-    introduceL = Label(userFrame, text=str(userinfo["description"]), anchor=SW)
-    creationL = Label(userFrame, text=str(userinfo["creation"]), anchor=W)
-    tweet_countL = Label(userFrame, text=str(userinfo["tweets"])+"  tweets")
-
-    nameL.configure(font=("Helvetica 27"))
-    screenL.configure(font=("Helvetica 10"))
-    introduceL.configure(font=("Helvetica 10"))
-    creationL.configure(font=("Helvetica 9"))
-    followersL.configure(font=("Helvetica 9 bold"))
-    tweet_countL.configure(font=("Helvetica 9 bold"))
-
-    nameL.pack()
-    screenL.pack()
-    introduceL.pack()
-    creationL.pack()
-    followersL.pack()
-    tweet_countL.pack()
-
-    nameL.place(x=5, y=50, width=300, height=45)
-    screenL.place(x=1, y=95, width=342, height=25)
-    introduceL.place(x=1, y=130, width=300, height=20)
-    creationL.place(x=1, y=170, width=300, height=10)
-    followersL.place(x=1, y=190, width=150, height=10)
-    tweet_countL.place(x=150, y=190, width=100, height=10)
-
-    follow_btn = Button(userFrame, text="follow",
-                        command=follow_click, font="Consolas 10 bold", bg="#F0F8FF")
-    block_btn = Button(userFrame, text="block",
-                       command=block_click,  font="Consolas 10 bold", bg="#F0F8FF")
-    spam_btn = Button(userFrame, text="spam", command=spam_click,
-                      font="Consolas 10 bold", bg="#F0F8FF", fg="red")
-
-    dm_text = Text(userFrame, bd=1, bg="#ABB2B9", width=200,
-                   height=30, font="Helvetica 14", fg="black", relief="raised", border=2,)
-    send_btn = Button(userFrame, text="send", command=send_dm,
-                      border=1, background="#EAECEE")
-
-    follow_btn.pack()
-    block_btn.pack()
-    spam_btn.pack()
-    dm_text.pack()
-    send_btn.pack()
-
-    follow_btn.place(x=5, y=220, width=100, height=30)
-    block_btn.place(x=120, y=220, width=100, height=30)
-    spam_btn.place(x=235, y=220, width=100, height=30)
-    dm_text.place(x=10, y=550, width=320, height=150)
-    send_btn.place(x=150, y=700, width=50, height=30)
-
-
-def follow_click():
-    api.create_friendship(screen_name=str(userinfo["ID"]))
-
-
-def block_click():
-    api.create_block(screen_name=str(userinfo["ID"]))
-
-
-def spam_click():
-    api.report_spam(screen_name=user.screen_name)
-
-
 def my_info():
-
     # 트윗 올리기
     def post_tweet():
         api.update_status(status=tweet_text.get("1.0", END))
@@ -172,10 +163,10 @@ def my_info():
                     bg="Gray", anchor=NW, height=11, fg="white")
     nameL = Label(myFrame, text=str(myinfo["name"]), anchor=W, padx=0)
     followersL = Label(myFrame, text=str(
-        myinfo["Followers"])+"  Followers", anchor=W)
+        myinfo["Followers"]) + "  Followers", anchor=W)
     introduceL = Label(myFrame, text=str(myinfo["description"]), anchor=SW)
     creationL = Label(myFrame, text=str(myinfo["creation"]), anchor=W)
-    tweet_countL = Label(myFrame, text=str(myinfo["tweets"])+"  tweets")
+    tweet_countL = Label(myFrame, text=str(myinfo["tweets"]) + "  tweets")
 
     update_name = Text(myFrame, width=200, height=25)
     update_name.insert(END, "name")
@@ -212,7 +203,7 @@ def my_info():
     update_description.place(x=51, y=255, width=290, height=50)
 
     tweet_text = Text(myFrame, bd=1, bg="#ABB2B9", width=200,
-                      height=30, font="Helvetica 14", fg="black", relief="raised", border=2,)
+                      height=30, font="Helvetica 14", fg="black", relief="raised", border=2, )
     tweet_text.insert(END, "What's happening?")
     post_btn = Button(myFrame, text="post", command=post_tweet,
                       border=1, background="#EAECEE")
@@ -226,7 +217,6 @@ def my_info():
 
 # 검색 결과 저장
 def save_result():
-
     global searchdata
 
     search = search_bar.get(1.0, END)
@@ -254,8 +244,8 @@ def save_result():
         for i in range(1, 7):
             for tweet in tweets:
                 temp.append(str(tweet.created_at))
-                #searchdata = searchdata.assign(time=str(tweet.created_at))
-                #searchdata['time'] = pd.Series([str(tweet.created_at)])
+                # searchdata = searchdata.assign(time=str(tweet.created_at))
+                # searchdata['time'] = pd.Series([str(tweet.created_at)])
 
         searchdata['time'] = temp
 
@@ -279,7 +269,7 @@ def save_result():
 
         searchdata['like'] = temp
 
-    searchdata.to_excel(file_name.get("1.0", END+'-1c')+'.xlsx')
+    searchdata.to_excel(file_name.get("1.0", END + '-1c') + '.xlsx')
 
 
 #  searchdata = searchdata.append(
@@ -300,7 +290,6 @@ label.configure(font=("Helvetica", 20, "italic"))
 label.pack()
 label.place(x=0, y=0, height=70, width=1200)
 
-
 # bottom bar
 bottomlabel = Label(root, text="공개SW 1조 (일조하조)", width=1200, height=50,
                     fg="White", bg="#17202A")
@@ -314,13 +303,11 @@ search_bar = Text(root, bd=1, bg="#ABB2B9", width=200,
                   )
 search_bar.place(x=910, y=33, height=30, width=240)
 
-
 # 검색 버튼
 pt = PhotoImage(file="photo/search.png")
 search_btn = Button(root, image=pt, border=0, command=search_click)
 search_btn.pack()
 search_btn.place(x=1160, y=30)
-
 
 # 순서대로 user,검색결과(트윗),나
 userFrame = Frame(root, relief=SOLID, bd=3)
@@ -346,10 +333,8 @@ scr.pack(side=RIGHT, fill=Y)
 lists = Listbox(searchFrame, width=50, height=400,
                 relief="raised", background="White")
 
-
 # 프레임에 내 계정 정보 띄우기
 my_info()
-
 
 # 체크버튼 (저장할 항목)
 #  - - - - - - - - - - - - - - - - - - - - - -
@@ -379,7 +364,6 @@ time_chk.place(x=565, y=700)
 retweet_chk.place(x=650, y=700)
 like_chk.place(x=740, y=700)
 
-
 #  - - - - - - - - - - - - - - - - - - - - - -
 
 
@@ -393,6 +377,5 @@ file_save_btn = Button(
     root, text="SAVE", command=save_result, border=1, background="#EAECEE")
 file_save_btn.pack()
 file_save_btn.place(x=750, y=730, width=60, height=30)
-
 
 root.mainloop()
