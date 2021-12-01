@@ -68,19 +68,34 @@ def search_click():
                 print("해당 유저에게는 DM을 보낼 수 없습니다.")
 
         def follow_click():
-            api.create_friendship(screen_name=str(userinfo["ID"]))
+
+            if userinfo["following"] == False:
+                api.create_friendship(screen_name=str(userinfo["ID"]))
+                follow_btn.configure(text="following")
+                userinfo["following"] = True
+                messagebox.showinfo("follow", str(userinfo["name"]) + " : 팔로우하였습니다!")
+
+            else:
+                api.destroy_friendship(screen_name=str(userinfo["ID"]))
+                follow_btn.configure(text="follow")
+                userinfo["following"] = False
+                messagebox.showinfo("follow", str(
+                    userinfo["name"]) + " : 팔로우를 취소하였습니다")
+
+        def spam_click():
+            try:
+                spam = messagebox.askyesno("spam", "신고하시겠습니까?")
+                if spam == 'yes':
+                    api.report_spam(screen_name=user.screen_name)
+            except:
+                print("error")
 
         def block_click():
             api.create_block(screen_name=str(userinfo["ID"]))
 
-        def spam_click():
-            try:
-                api.report_spam(screen_name=user.screen_name)
-            except:
-                print("error")
-
         # GUI setting
         screenL = Label(userFrame, text=str(screenName),
+                        bg="Gray", anchor=NW, height=11, fg="white", font="Consolas")
         nameL = Label(userFrame, text=str(userinfo["name"]), anchor=W, padx=0)
         followersL = Label(userFrame, text=str(
             userinfo["Followers"]) + "  Followers", anchor=W)
