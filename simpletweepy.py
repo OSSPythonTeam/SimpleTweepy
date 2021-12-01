@@ -360,6 +360,12 @@ searchFrame = Frame(root, relief=SOLID, bd=3)
 myFrame = Frame(root, relief=SOLID, bd=3)
 timelineFrame = Frame(root,relief=SOLID, bd=3)
 
+title_Image = PhotoImage(file="photo/twitter.png")
+title_Img = Label(root, image=title_Image, bg="#17202A")
+title_Img.pack()
+title_Img.place(x=475,y=20)
+
+
 userFrame.pack()
 searchFrame.pack()
 myFrame.pack()
