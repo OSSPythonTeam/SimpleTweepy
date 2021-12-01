@@ -11,6 +11,7 @@ from tweepy import client
 from PIL import Image
 import pandas as pd
 
+from tweepy.SimpleTimeLine import simple_timeline
 from tweepy.simpleAuth import simpleAuth
 from tweepy.simpleSearch import simple_tweet_result
 from tweepy.simpleUser import simple_user_result
@@ -59,6 +60,19 @@ def search_click():
 
         # simpleUser
         userinfo = simple_user_result(api, screenName)
+
+        # simpleTimeLine
+        result = simple_timeline(api, screenName)
+
+        # lists.pack(side=LEFT, fill=X, expand=True)
+        # lists.config(yscrollcommand=tscr.set)
+        # lists.delete(0, END)
+        timeline_lists.pack(side=LEFT, fill=X, expand=True)
+        timeline_lists.config(yscrollcommand=tscr.set)
+        timeline_lists.delete(0, END)
+        for x in result:
+            timeline_lists.insert(END, str(x))
+            #lists.insert(END, str(x))
 
         def send_dm():
             try:
@@ -344,14 +358,17 @@ search_btn.place(x=1160, y=30)
 userFrame = Frame(root, relief=SOLID, bd=3)
 searchFrame = Frame(root, relief=SOLID, bd=3)
 myFrame = Frame(root, relief=SOLID, bd=3)
+timelineFrame = Frame(root,relief=SOLID, bd=3)
 
 userFrame.pack()
 searchFrame.pack()
 myFrame.pack()
+timelineFrame.pack()
 
 userFrame.place(x=20, y=90, width=350, height=760)
 searchFrame.place(x=390, y=90, width=420, height=600)
 myFrame.place(x=830, y=90, width=350, height=760)
+timelineFrame.place(x=30,y=350,width=330, height=280)
 #  user_box = Frame(root, relief=SOLID, bd=2)
 #     user_box.pack()
 #     user_box.place(x=20, y=150, width=600, height=500)
@@ -362,6 +379,13 @@ scr = Scrollbar(searchFrame)
 scr.pack(side=RIGHT, fill=Y)
 
 lists = Listbox(searchFrame, width=50, height=400,
+                relief="raised", background="White")
+
+# 유저 타임라인 결과 부분 (스크롤)
+tscr = Scrollbar(timelineFrame)
+tscr.pack(side=RIGHT, fill=Y)
+
+timeline_lists = Listbox(timelineFrame, width=0, height=400,
                 relief="raised", background="White")
 
 # 프레임에 내 계정 정보 띄우기
