@@ -1,5 +1,5 @@
 from tkinter import *
-from tkinter import messagebox
+from tkinter import messagebox, filedialog
 from tkinter import font
 import tkinter
 from typing import Sized
@@ -238,6 +238,11 @@ def save_result():
     keyword = search[1:]
     tweets = api.search_tweets(keyword)
 
+    saveL = Label(root, text="", anchor=W, padx=0)
+    saveL.configure(font=("Helvetica 14"))
+    saveL.pack()
+    saveL.place(x=390, y=800, width=360, height=25)
+
     if idvar.get():
         temp = []
         for i in range(1, 7):
@@ -284,7 +289,18 @@ def save_result():
 
         searchdata['like'] = temp
 
-    searchdata.to_excel(file_name.get("1.0", END + '-1c') + '.xlsx')
+    dir = Tk()
+    dir.withdraw()
+    dir.dirName = filedialog.askdirectory()
+    print(dir.dirName)
+
+    if savevar.get() == "xlsx":
+        searchdata.to_excel(dir.dirName + '/' + file_name.get("1.0", END + '-1c') + '.xlsx')
+        saveL.config(text=dir.dirName + "에 저장했습니다.")
+
+    elif savevar.get() == "csv":
+        searchdata.to_csv(dir.dirName + '/' + file_name.get("1.0", END + '-1c') + 'c.csv', index=False)
+        saveL.config(text=dir.dirName + "에 저장했습니다.")
 
 
 #  searchdata = searchdata.append(
@@ -379,6 +395,20 @@ time_chk.place(x=565, y=700)
 retweet_chk.place(x=650, y=700)
 like_chk.place(x=740, y=700)
 
+# 라디오버튼 (저장할 파일 확장자 선택)
+#  - - - - - - - - - - - - - - - - - - - - - -
+savevar = StringVar()
+
+xlsx_chk = Radiobutton(root, text=".xlsx", variable=savevar, value="xlsx")
+csv_chk = Radiobutton(root, text=".csv", variable=savevar, value="csv")
+#기본값
+xlsx_chk.select()
+
+xlsx_chk.pack()
+csv_chk.pack()
+
+xlsx_chk.place(x=410, y=770)
+csv_chk.place(x=480, y=770)
 #  - - - - - - - - - - - - - - - - - - - - - -
 
 
