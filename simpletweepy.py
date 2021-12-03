@@ -472,8 +472,7 @@ tscr.pack(side=RIGHT, fill=Y)
 timeline_lists = Listbox(timelineFrame, width=0, height=400,
                          relief="raised", background="White")
 
-# 프레임에 내 계정 정보 띄우기
-my_info()
+
 
 # 체크버튼 (저장할 항목)
 #  - - - - - - - - - - - - - - - - - - - - - -
@@ -530,5 +529,8 @@ file_save_btn = Button(
     root, text="SAVE", command=save_result, border=1, background="#EAECEE")
 file_save_btn.pack()
 file_save_btn.place(x=750, y=730, width=60, height=30)
+
+# 프레임에 내 계정 정보 띄우기
+my_info()
 
 root.mainloop()
