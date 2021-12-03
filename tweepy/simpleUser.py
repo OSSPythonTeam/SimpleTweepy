@@ -1,5 +1,5 @@
 userinfo = {"name": "", "ID": "", "description": "",
-            "creation": "", "Followers": "", "tweets": "", "recipient_id": ""}
+            "creation": "", "Followers": "", "tweets": "", "recipient_id": "","profile_image_url":""}
 
 
 def simple_user_result(api, screenName):
@@ -13,6 +13,7 @@ def simple_user_result(api, screenName):
         userinfo["tweets"] = user.statuses_count
         userinfo["Followers"] = user.followers_count
         userinfo["recipient_id"] = user.id
+        userinfo["profile_image_url"] = user.profile_image_url_https
 
         print("name : " + userinfo["name"])
         print("creation : " + str(userinfo["creation"]))
@@ -21,6 +22,7 @@ def simple_user_result(api, screenName):
         print("tweets : " + str(userinfo["tweets"]))
         print("Followers : " + str(userinfo["Followers"]))
         print("recipient_id : " + str(userinfo["recipient_id"]))
+        print("profile_image_url : " + str(userinfo["profile_image_url"]))
 
         return userinfo
 

@@ -1,15 +1,11 @@
 from tkinter import *
 from tkinter import messagebox, filedialog
 from tkinter import font
-import tkinter
-from typing import Sized
-import tweepy
 from tweepy import *
-from tweepy import API
 from tweepy import user
-from tweepy import client
-from PIL import Image
+from PIL import Image, ImageTk
 import pandas as pd
+import urllib.request
 
 from tweepy.SimpleTimeLine import simple_timeline
 from tweepy.simpleAuth import simpleAuth
@@ -35,7 +31,7 @@ temp = api.get_user(screen_name=id)
 
 myinfo = {"name": temp.name, "ID": id, "description": temp.description,
           "creation": temp.created_at, "Followers": temp.following if temp.following else 0,
-          "tweets": temp.statuses_count}
+          "tweets": temp.statuses_count, "profile_image_url":temp.profile_image_url}
 
 searchdata = pd.DataFrame(columns=['name', 'text'])
 
@@ -64,21 +60,18 @@ def search_click():
         # simpleTimeLine
         result = simple_timeline(api, screenName)
 
-        # lists.pack(side=LEFT, fill=X, expand=True)
-        # lists.config(yscrollcommand=tscr.set)
-        # lists.delete(0, END)
         timeline_lists.pack(side=LEFT, fill=X, expand=True)
         timeline_lists.config(yscrollcommand=tscr.set)
         timeline_lists.delete(0, END)
         for x in result:
             timeline_lists.insert(END, str(x))
-            #lists.insert(END, str(x))
 
         def send_dm():
             try:
                 api.send_direct_message(
                     recipient_id=userinfo["recipient_id"], text=dm_text.get("1.0", END))
             except:
+                messagebox.showinfo("DM","해당 유저에게는 DM을 보낼 수 없습니다.")
                 print("해당 유저에게는 DM을 보낼 수 없습니다.")
 
         def follow_click():
@@ -106,6 +99,10 @@ def search_click():
 
         def block_click():
             api.create_block(screen_name=str(userinfo["ID"]))
+
+        # 이미지 요청 및 다운로드
+        url = userinfo["profile_image_url"]
+        urllib.request.urlretrieve(url, "test.jpg")
 
         # GUI setting
         screenL = Label(userFrame, text=str(screenName),
@@ -162,6 +159,18 @@ def search_click():
         dm_text.place(x=10, y=550, width=320, height=150)
         send_btn.place(x=150, y=700, width=50, height=30)
 
+        # 저장 된 이미지 확인
+        canvas = Canvas(userFrame, width=50, height=50, bg="white")
+        canvas.delete("all")
+        canvas.pack()
+        canvas.place(x=5, y=5)
+
+        img2 = Image.open(r"test.jpg")
+        image2 = ImageTk.PhotoImage(img2)
+
+        canvas.create_image(27, 27, image=image2)
+        root.mainloop()
+
     else:
         return
 
@@ -188,6 +197,47 @@ def my_info():
                 text=myinfo["description"], font=("Helvetica 10"), anchor=NW)
             update_description.delete("1.0", END)
 
+
+
+        # 프로필 이미지 바꾸기
+    def profileimg_change():
+        global myinfo
+        dir = Tk()
+        dir.withdraw()
+        dir.dirName = filedialog.askopenfilename(title='select image', filetypes=(
+            ('jpeg file', '*.jpg'), ('png file', '*.png'), ('all file', '*.*')))
+        print(dir.dirName)
+
+        search = dir.dirName
+        filename = search.strip('\n')
+        api.update_profile_image(filename)
+
+        temp = api.get_settings()
+        id = "@" + temp["screen_name"]
+        temp = api.get_user(screen_name=id)
+        myinfo = {"name": temp.name, "ID": id, "description": temp.description,
+                  "creation": temp.created_at, "Followers": temp.following if temp.following else 0,
+                  "tweets": temp.statuses_count,
+                  "profile_image_url": temp.profile_image_url
+                  }
+
+        # 이미지 요청 및 다운로드
+        url2 = myinfo["profile_image_url"]
+        print(url2)
+        urllib.request.urlretrieve(url2, "my.jpg")
+
+        # 저장 된 이미지 확인
+        canvas = Canvas(myFrame, width=50, height=50, bg="white")
+        canvas.delete("all")
+        canvas.pack()
+        canvas.place(x=5, y=5)
+
+        img2 = Image.open(r"my.jpg")
+        image2 = ImageTk.PhotoImage(img2)
+
+        canvas.create_image(27, 27, image=image2)
+        root.mainloop()
+
     screenL = Label(myFrame, text=str(myinfo["ID"]),
                     bg="Gray", anchor=NW, height=11, fg="white")
     nameL = Label(myFrame, text=str(myinfo["name"]), anchor=W, padx=0)
@@ -196,6 +246,31 @@ def my_info():
     introduceL = Label(myFrame, text=str(myinfo["description"]), anchor=SW)
     creationL = Label(myFrame, text=str(myinfo["creation"]), anchor=W)
     tweet_countL = Label(myFrame, text=str(myinfo["tweets"]) + "  tweets")
+
+    imgL = Label(myFrame, bd=1, bg="#ABB2B9", width=300, height=30,
+                 text="Select image file you want", anchor=W, padx=0)
+
+    imgL.configure(font="Helvetica 14", fg="Black", relief="raised", border=2)
+
+    img_changebtn = Button(myFrame, text="open", command=profileimg_change,
+                           border=1, background="#EAECEE")
+
+    # 이미지 요청 및 다운로드
+    url2 = myinfo["profile_image_url"]
+    print(url2)
+    urllib.request.urlretrieve(url2, "my.jpg")
+
+    # 저장 된 이미지 확인
+    canvas = Canvas(myFrame, width=50, height=50, bg="white")
+    canvas.delete("all")
+    canvas.pack()
+    canvas.place(x=5, y=5)
+
+    img2 = Image.open(r"my.jpg")
+    image2 = ImageTk.PhotoImage(img2)
+
+    canvas.create_image(27, 27, image=image2)
+
 
     update_name = Text(myFrame, width=200, height=25)
     update_name.insert(END, "name")
@@ -219,6 +294,8 @@ def my_info():
     saveInfo_btn.pack()
     update_name.pack()
     update_description.pack()
+    imgL.pack()
+    img_changebtn.pack()
 
     nameL.place(x=5, y=50, width=300, height=45)
     screenL.place(x=1, y=95, width=342, height=25)
@@ -226,6 +303,8 @@ def my_info():
     creationL.place(x=1, y=170, width=300, height=10)
     followersL.place(x=1, y=190, width=150, height=10)
     tweet_countL.place(x=150, y=190, width=100, height=10)
+    imgL.place(x=1, y=400, height=30, width=291)
+    img_changebtn.place(x=292, y=400, width=50, height=30)
 
     saveInfo_btn.place(x=1, y=230, width=50, height=75)
     update_name.place(x=51, y=230, width=290, height=25)
@@ -242,7 +321,7 @@ def my_info():
 
     tweet_text.place(x=10, y=550, width=320, height=150)
     post_btn.place(x=150, y=700, width=50, height=30)
-
+    root.mainloop()
 
 # 검색 결과 저장
 def save_result():
@@ -358,13 +437,12 @@ search_btn.place(x=1160, y=30)
 userFrame = Frame(root, relief=SOLID, bd=3)
 searchFrame = Frame(root, relief=SOLID, bd=3)
 myFrame = Frame(root, relief=SOLID, bd=3)
-timelineFrame = Frame(root,relief=SOLID, bd=3)
+timelineFrame = Frame(root, relief=SOLID, bd=3)
 
 title_Image = PhotoImage(file="photo/twitter.png")
 title_Img = Label(root, image=title_Image, bg="#17202A")
 title_Img.pack()
-title_Img.place(x=475,y=20)
-
+title_Img.place(x=475, y=20)
 
 userFrame.pack()
 searchFrame.pack()
@@ -374,7 +452,7 @@ timelineFrame.pack()
 userFrame.place(x=20, y=90, width=350, height=760)
 searchFrame.place(x=390, y=90, width=420, height=600)
 myFrame.place(x=830, y=90, width=350, height=760)
-timelineFrame.place(x=30,y=350,width=330, height=280)
+timelineFrame.place(x=30, y=350, width=330, height=280)
 #  user_box = Frame(root, relief=SOLID, bd=2)
 #     user_box.pack()
 #     user_box.place(x=20, y=150, width=600, height=500)
@@ -392,7 +470,7 @@ tscr = Scrollbar(timelineFrame)
 tscr.pack(side=RIGHT, fill=Y)
 
 timeline_lists = Listbox(timelineFrame, width=0, height=400,
-                relief="raised", background="White")
+                         relief="raised", background="White")
 
 # 프레임에 내 계정 정보 띄우기
 my_info()
@@ -431,7 +509,7 @@ savevar = StringVar()
 
 xlsx_chk = Radiobutton(root, text=".xlsx", variable=savevar, value="xlsx")
 csv_chk = Radiobutton(root, text=".csv", variable=savevar, value="csv")
-#기본값
+# 기본값
 xlsx_chk.select()
 
 xlsx_chk.pack()
