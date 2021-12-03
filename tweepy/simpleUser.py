@@ -14,6 +14,7 @@ def simple_user_result(api, screenName):
         userinfo["Followers"] = user.followers_count
         userinfo["recipient_id"] = user.id
         userinfo["profile_image_url"] = user.profile_image_url_https
+        userinfo["following"] = user.following
 
         print("name : " + userinfo["name"])
         print("creation : " + str(userinfo["creation"]))
