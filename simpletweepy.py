@@ -15,11 +15,11 @@ from tweepy.simpleSearch import simple_tweet_result
 from tweepy.simpleUser import simple_user_result
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-consumer_key = "4z5YS5SKExEeKTsectEawBYW5"
-consumer_secret = "ZDhgBYpPWGp0c7hqsV8gyh9NxJ3i60gMWekgJla49JiL0pPSVg"
+consumer_key = ""
+consumer_secret = ""
 
-access_token = "1447980933789863937-429Yvd0uIrdqPeCQq0aNXZEljtfy5f"
-access_token_secret = "MbkyBf0hyuXlM5RWgLzvvHFRkPpX4uYke543oLgNNOUAh"
+access_token = ""
+access_token_secret = ""
 
 api = simpleAuth(consumer_key, consumer_secret, access_token, access_token_secret)
 
