@@ -1,5 +1,5 @@
 userinfo = {"name": "", "ID": "", "description": "",
-            "creation": "", "Followers": "", "tweets": "", "recipient_id": "","profile_image_url":""}
+            "creation": "", "Followers": "", "tweets": "", "recipient_id": "", "profile_image_url": "", "following": ""}
 
 
 def simple_user_result(api, screenName):

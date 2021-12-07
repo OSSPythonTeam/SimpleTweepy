@@ -1,6 +1,8 @@
 from tkinter import *
 from tkinter import messagebox, filedialog
 from tkinter import font
+
+import tweepy
 from tweepy import *
 from tweepy import user
 from PIL import Image, ImageTk
@@ -13,15 +15,15 @@ from tweepy.simpleSearch import simple_tweet_result
 from tweepy.simpleUser import simple_user_result
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-consumer_key = ""
-consumer_secret = ""
+consumer_key = "4z5YS5SKExEeKTsectEawBYW5"
+consumer_secret = "ZDhgBYpPWGp0c7hqsV8gyh9NxJ3i60gMWekgJla49JiL0pPSVg"
 
-access_token = ""
-access_token_secret = ""
+access_token = "1447980933789863937-429Yvd0uIrdqPeCQq0aNXZEljtfy5f"
+access_token_secret = "MbkyBf0hyuXlM5RWgLzvvHFRkPpX4uYke543oLgNNOUAh"
 
 api = simpleAuth(consumer_key, consumer_secret, access_token, access_token_secret)
 
-api.verify_credentials().name
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
@@ -31,9 +33,9 @@ temp = api.get_user(screen_name=id)
 
 myinfo = {"name": temp.name, "ID": id, "description": temp.description,
           "creation": temp.created_at, "Followers": temp.following if temp.following else 0,
-          "tweets": temp.statuses_count, "profile_image_url":temp.profile_image_url}
+          "tweets": temp.statuses_count, "profile_image_url": temp.profile_image_url}
 
-searchdata = pd.DataFrame(columns=['name', 'text'])
+search_data = pd.DataFrame(columns=['name', 'text'])
 
 
 def search_click():
@@ -68,14 +70,13 @@ def search_click():
 
         def send_dm():
             try:
-                api.send_direct_message(
-                    recipient_id=userinfo["recipient_id"], text=dm_text.get("1.0", END))
+                api.send_direct_message(recipient_id=userinfo["recipient_id"], text=dm_text.get("1.0", END))
+                dm_text.delete("1.0", END)
             except:
-                messagebox.showinfo("DM","해당 유저에게는 DM을 보낼 수 없습니다.")
+                messagebox.showinfo("DM", "해당 유저에게는 DM을 보낼 수 없습니다.")
                 print("해당 유저에게는 DM을 보낼 수 없습니다.")
 
         def follow_click():
-
             if userinfo["following"] == False:
                 api.create_friendship(screen_name=str(userinfo["ID"]))
                 follow_btn.configure(text="following")
@@ -102,7 +103,7 @@ def search_click():
 
         # 이미지 요청 및 다운로드
         url = userinfo["profile_image_url"]
-        urllib.request.urlretrieve(url, "test.jpg")
+        urllib.request.urlretrieve(url, "user.jpg")
 
         # GUI setting
         screenL = Label(userFrame, text=str(screenName),
@@ -128,12 +129,12 @@ def search_click():
         followersL.pack()
         tweet_countL.pack()
 
-        nameL.place(x=5, y=50, width=300, height=45)
-        screenL.place(x=1, y=95, width=342, height=25)
-        introduceL.place(x=1, y=130, width=300, height=20)
-        creationL.place(x=1, y=170, width=300, height=10)
-        followersL.place(x=1, y=190, width=150, height=10)
-        tweet_countL.place(x=150, y=190, width=100, height=10)
+        nameL.place(x=5, y=55, width=330, height=45)
+        screenL.place(x=1, y=100, width=342, height=25)
+        introduceL.place(x=1, y=125, width=330, height=38)
+        creationL.place(x=1, y=175, width=300, height=10)
+        followersL.place(x=1, y=195, width=150, height=10)
+        tweet_countL.place(x=150, y=195, width=100, height=10)
 
         follow_btn = Button(userFrame, text="follow",
                             command=follow_click, font="Consolas 10 bold", bg="#F0F8FF")
@@ -143,7 +144,7 @@ def search_click():
                           font="Consolas 10 bold", bg="#F0F8FF", fg="red")
 
         dm_text = Text(userFrame, bd=1, bg="#ABB2B9", width=200,
-                       height=30, font="Helvetica 14", fg="black", relief="raised", border=2, )
+                       height=30, font="Helvetica 14", fg="black", relief="raised", border=2)
         send_btn = Button(userFrame, text="send", command=send_dm,
                           border=1, background="#EAECEE")
 
@@ -165,7 +166,7 @@ def search_click():
         canvas.pack()
         canvas.place(x=5, y=5)
 
-        img2 = Image.open(r"test.jpg")
+        img2 = Image.open(r"user.jpg")
         image2 = ImageTk.PhotoImage(img2)
 
         canvas.create_image(27, 27, image=image2)
@@ -179,6 +180,7 @@ def my_info():
     # 트윗 올리기
     def post_tweet():
         api.update_status(status=tweet_text.get("1.0", END))
+        tweet_text.delete("1.0", END)
 
     # 프로필 업데이트
     def update_info():
@@ -197,9 +199,7 @@ def my_info():
                 text=myinfo["description"], font=("Helvetica 10"), anchor=NW)
             update_description.delete("1.0", END)
 
-
-
-        # 프로필 이미지 바꾸기
+    # 프로필 이미지 바꾸기
     def profileimg_change():
         global myinfo
         dir = Tk()
@@ -257,7 +257,7 @@ def my_info():
 
     # 이미지 요청 및 다운로드
     url2 = myinfo["profile_image_url"]
-    print(url2)
+    # print(url2)
     urllib.request.urlretrieve(url2, "my.jpg")
 
     # 저장 된 이미지 확인
@@ -270,7 +270,6 @@ def my_info():
     image2 = ImageTk.PhotoImage(img2)
 
     canvas.create_image(27, 27, image=image2)
-
 
     update_name = Text(myFrame, width=200, height=25)
     update_name.insert(END, "name")
@@ -297,11 +296,11 @@ def my_info():
     imgL.pack()
     img_changebtn.pack()
 
-    nameL.place(x=5, y=50, width=300, height=45)
-    screenL.place(x=1, y=95, width=342, height=25)
-    introduceL.place(x=1, y=130, width=300, height=20)
-    creationL.place(x=1, y=170, width=300, height=10)
-    followersL.place(x=1, y=190, width=150, height=10)
+    nameL.place(x=5, y=55, width=330, height=45)
+    screenL.place(x=1, y=100, width=342, height=25)
+    introduceL.place(x=1, y=125, width=330, height=40)
+    creationL.place(x=1, y=175, width=300, height=10)
+    followersL.place(x=1, y=195, width=150, height=10)
     tweet_countL.place(x=150, y=190, width=100, height=10)
     imgL.place(x=1, y=400, height=30, width=291)
     img_changebtn.place(x=292, y=400, width=50, height=30)
@@ -323,9 +322,10 @@ def my_info():
     post_btn.place(x=150, y=700, width=50, height=30)
     root.mainloop()
 
+
 # 검색 결과 저장
 def save_result():
-    global searchdata
+    global search_data
 
     search = search_bar.get(1.0, END)
     keyword = search[1:]
@@ -337,50 +337,44 @@ def save_result():
     saveL.place(x=390, y=800, width=360, height=25)
 
     if idvar.get():
-        temp = []
+        temp_data = []
         for i in range(1, 7):
-            for tweet in tweets:
-                temp.append(str(tweet.author.name))
+            for tweet_data in tweets:
+                temp_data.append(str(tweet_data.author.name))
 
-        searchdata['name'] = temp
+        search_data['name'] = temp_data
 
     if textvar.get():
-        temp = []
+        temp_data = []
         for i in range(1, 7):
-            for tweet in tweets:
-                temp.append(tweet.text)
+            for tweet_data in tweets:
+                temp_data.append(tweet_data.text)
 
-        searchdata['text'] = temp
+        search_data['text'] = temp_data
 
     if timevar.get():
-        temp = []
+        temp_data = []
         for i in range(1, 7):
-            for tweet in tweets:
-                temp.append(str(tweet.created_at))
-                # searchdata = searchdata.assign(time=str(tweet.created_at))
-                # searchdata['time'] = pd.Series([str(tweet.created_at)])
+            for tweet_data in tweets:
+                temp_data.append(str(tweet_data.created_at))
 
-        searchdata['time'] = temp
+        search_data['time'] = temp_data
 
     if retweetvar.get():
-        temp = []
+        temp_data = []
         for i in range(1, 7):
-            for tweet in tweets:
-                temp.append(tweet.retweet_count)
-                # searchdata['retweet'] = pd.Series(tweet.retweet_count)
-                # searchdata = searchdata.fillna(value=0)
+            for tweet_data in tweets:
+                temp_data.append(tweet_data.retweet_count)
 
-        searchdata['retweet'] = temp
+        search_data['retweet'] = temp_data
 
     if likevar.get():
-        temp = []
+        temp_data = []
         for i in range(1, 7):
-            for tweet in tweets:
-                temp.append(tweet.favorite_count)
-                # searchdata['like'] = pd.Series([tweet.favorite_count])
-                # searchdata = searchdata.fillna(value=0)
+            for tweet_data in tweets:
+                temp_data.append(tweet_data.favorite_count)
 
-        searchdata['like'] = temp
+        search_data['like'] = temp_data
 
     dir = Tk()
     dir.withdraw()
@@ -388,11 +382,11 @@ def save_result():
     print(dir.dirName)
 
     if savevar.get() == "xlsx":
-        searchdata.to_excel(dir.dirName + '/' + file_name.get("1.0", END + '-1c') + '.xlsx')
+        search_data.to_excel(dir.dirName + '/' + file_name.get("1.0", END + '-1c') + '.xlsx')
         saveL.config(text=dir.dirName + "에 저장했습니다.")
 
     elif savevar.get() == "csv":
-        searchdata.to_csv(dir.dirName + '/' + file_name.get("1.0", END + '-1c') + 'c.csv', index=False)
+        search_data.to_csv(dir.dirName + '/' + file_name.get("1.0", END + '-1c') + 'c.csv', index=False)
         saveL.config(text=dir.dirName + "에 저장했습니다.")
 
 
@@ -471,8 +465,6 @@ tscr.pack(side=RIGHT, fill=Y)
 
 timeline_lists = Listbox(timelineFrame, width=0, height=400,
                          relief="raised", background="White")
-
-
 
 # 체크버튼 (저장할 항목)
 #  - - - - - - - - - - - - - - - - - - - - - -

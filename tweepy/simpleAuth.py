@@ -1,5 +1,6 @@
 import tweepy
 
+
 def simpleAuth(key, secret_Key, token, secret_Token):
     consumer_key = key
     consumer_secret = secret_Key
