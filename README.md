@@ -2,7 +2,10 @@
 Tweepy Project
 
 
-##공개소프트웨어 1조 프로젝트
+
+
+
+## 공개소프트웨어 1조 프로젝트
 
 - 목적 : 기존의 Tweepy를 개선하여 처음 사용하는 이용자의 생산성을 올릴 수 있는 프로젝트
 - 개발 기간 : 21.10.18 ~ 21.12.08
@@ -29,10 +32,10 @@ Tweepy Project
 
 **담당**
 
-민지영 : 팀장, 보고서 총괄 및 simpleTweepy 제작
-김영민 : tweepy 라이브러리 분석, 저장기능 구현, GUI 파트 담당
-구승석 : tweepy 라이브러리 분석, 이미지 불러오기 구현, 개인 정보 구현 
-조기천 : simpleTweepyBot, simpleTimeline, simpleSearch, SimpleUser, WallPaper 구현
+- 민지영 : 팀장, 보고서 총괄 및 simpleTweepy 제작
+- 김영민 : tweepy 라이브러리 분석, 저장기능 구현, GUI 파트 담당
+- 구승석 : tweepy 라이브러리 분석, 이미지 불러오기 구현, 개인 정보 구현 
+- 조기천 : simpleTweepyBot, simpleTimeline, simpleSearch, SimpleUser, WallPaper 구현
  
  
  
