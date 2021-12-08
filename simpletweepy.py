@@ -329,52 +329,45 @@ def save_result():
 
     search = search_bar.get(1.0, END)
     keyword = search[1:]
-    tweets = api.search_tweets(keyword)
 
     saveL = Label(root, text="", anchor=W, padx=0)
     saveL.configure(font=("Helvetica 14"))
     saveL.pack()
     saveL.place(x=390, y=800, width=360, height=25)
 
-    if idvar.get():
-        temp_data = []
-        for i in range(1, 7):
-            for tweet_data in tweets:
-                temp_data.append(str(tweet_data.author.name))
+    id_ = []
+    text_ = []
+    time_ = []
+    retweet_ = []
+    like_ = []
 
-        search_data['name'] = temp_data
+    for tweet in tweepy.Cursor(api.search_tweets, keyword).items(30):
+        try:
+            id_.append(str(tweet.author.name))
+            text_.append(str(tweet.text))
+            time_.append(str(tweet.created_at))
+            retweet_.append(str(tweet.retweet_count))
+            like_.append(str(tweet.favorite_count))
+
+        except tweepy.TweepError as e:
+            print(e.reason)
+        except StopIteration:
+            break
+
+    if idvar.get():
+        search_data['name'] = pd.Series(id_)
 
     if textvar.get():
-        temp_data = []
-        for i in range(1, 7):
-            for tweet_data in tweets:
-                temp_data.append(tweet_data.text)
-
-        search_data['text'] = temp_data
+        search_data['text'] = pd.Series(text_)
 
     if timevar.get():
-        temp_data = []
-        for i in range(1, 7):
-            for tweet_data in tweets:
-                temp_data.append(str(tweet_data.created_at))
-
-        search_data['time'] = temp_data
+        search_data['time'] = pd.Series(time_)
 
     if retweetvar.get():
-        temp_data = []
-        for i in range(1, 7):
-            for tweet_data in tweets:
-                temp_data.append(tweet_data.retweet_count)
-
-        search_data['retweet'] = temp_data
+        search_data['retweet'] = pd.Series(retweet_)
 
     if likevar.get():
-        temp_data = []
-        for i in range(1, 7):
-            for tweet_data in tweets:
-                temp_data.append(tweet_data.favorite_count)
-
-        search_data['like'] = temp_data
+        search_data['like'] = pd.Series(like_)
 
     dir = Tk()
     dir.withdraw()

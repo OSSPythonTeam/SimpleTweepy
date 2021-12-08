@@ -50,7 +50,7 @@ def put_last_tweet(file, Id):
     return
 
 
-# 자동 응답
+# 트위터 봇 자동 응답 기능
 def respondToTweet(file='tweet_ID.txt'):
     last_id = get_last_tweet(file)
     mentions = api.mentions_timeline(since_id=last_id, tweet_mode='extended')
@@ -66,6 +66,7 @@ def respondToTweet(file='tweet_ID.txt'):
         print("id : ")
         print(new_id)
 
+        # #cat이라는 키워드가 있을 시 아래 내용 수행
         if '#cat' in mention.full_text.lower():
             logger.info("Responding back with Cat to -{}".format(mention.id))
             try:
