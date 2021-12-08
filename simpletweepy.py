@@ -15,11 +15,11 @@ from tweepy.simpleSearch import simple_tweet_result
 from tweepy.simpleUser import simple_user_result
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-consumer_key = "4z5YS5SKExEeKTsectEawBYW5"
-consumer_secret = "ZDhgBYpPWGp0c7hqsV8gyh9NxJ3i60gMWekgJla49JiL0pPSVg"
+consumer_key = ""
+consumer_secret = ""
 
-access_token = "1447980933789863937-429Yvd0uIrdqPeCQq0aNXZEljtfy5f"
-access_token_secret = "MbkyBf0hyuXlM5RWgLzvvHFRkPpX4uYke543oLgNNOUAh"
+access_token = ""
+access_token_secret = ""
 
 api = simpleAuth(consumer_key, consumer_secret, access_token, access_token_secret)
 
@@ -325,7 +325,7 @@ def my_info():
 
 # 검색 결과 저장
 def save_result():
-    global searchdata
+    global search_data
 
     search = search_bar.get(1.0, END)
     keyword = search[1:]
@@ -336,39 +336,45 @@ def save_result():
     saveL.pack()
     saveL.place(x=390, y=800, width=360, height=25)
 
-    id_ = []
-    text_ = []
-    time_ = []
-    retweet_ = []
-    like_ = []
-
-    for tweet in tweepy.Cursor(api.search_tweets, keyword).items(30):
-        try:
-            id_.append(str(tweet.author.name))
-            text_.append(str(tweet.text))
-            time_.append(str(tweet.created_at))
-            retweet_.append(str(tweet.retweet_count))
-            like_.append(str(tweet.favorite_count))
-
-        except tweepy.TweepError as e:
-            print(e.reason)
-        except StopIteration:
-            break
-
     if idvar.get():
-        search_data['name'] = pd.Series(id_)
+        temp_data = []
+        for i in range(1, 7):
+            for tweet_data in tweets:
+                temp_data.append(str(tweet_data.author.name))
+
+        search_data['name'] = temp_data
 
     if textvar.get():
-        search_data['text'] = pd.Series(text_)
+        temp_data = []
+        for i in range(1, 7):
+            for tweet_data in tweets:
+                temp_data.append(tweet_data.text)
+
+        search_data['text'] = temp_data
 
     if timevar.get():
-        search_data['time'] = pd.Series(time_)
+        temp_data = []
+        for i in range(1, 7):
+            for tweet_data in tweets:
+                temp_data.append(str(tweet_data.created_at))
+
+        search_data['time'] = temp_data
 
     if retweetvar.get():
-        search_data['retweet'] = pd.Series(retweet_)
+        temp_data = []
+        for i in range(1, 7):
+            for tweet_data in tweets:
+                temp_data.append(tweet_data.retweet_count)
+
+        search_data['retweet'] = temp_data
 
     if likevar.get():
-        search_data['like'] = pd.Series(like_)
+        temp_data = []
+        for i in range(1, 7):
+            for tweet_data in tweets:
+                temp_data.append(tweet_data.favorite_count)
+
+        search_data['like'] = temp_data
 
     dir = Tk()
     dir.withdraw()
@@ -378,12 +384,11 @@ def save_result():
     if savevar.get() == "xlsx":
         search_data.to_excel(dir.dirName + '/' + file_name.get("1.0", END + '-1c') + '.xlsx')
         saveL.config(text=dir.dirName + "에 저장했습니다.")
-        root.mainloop()
 
     elif savevar.get() == "csv":
         search_data.to_csv(dir.dirName + '/' + file_name.get("1.0", END + '-1c') + 'c.csv', index=False)
         saveL.config(text=dir.dirName + "에 저장했습니다.")
-        root.mainloop()
+
 
 #  searchdata = searchdata.append(
 #                 {'name': str(tweet.author.name),
