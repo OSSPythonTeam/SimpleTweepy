@@ -2,6 +2,7 @@
 Tweepy Project
 
 
+![1.png](1.jpg)
 ##공개소프트웨어 1조 프로젝트
 
 - 목적 : 기존의 Tweepy를 개선하여 처음 사용하는 이용자의 생산성을 올릴 수 있는 프로젝트
@@ -35,4 +36,6 @@ Tweepy Project
 조기천 : simpleTweepyBot, simpleTimeline, simpleSearch, SimpleUser, WallPaper 구현
  
  
- 
+# 봇 예시
+고양이 이미지 API를 활용하여 랜덤으로 고양이 이미지를 답장해준다.
+![2.png](2.jpg)
